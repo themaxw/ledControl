@@ -1,0 +1,9 @@
+[Unit]
+# to update service file: sudo cp ledControl.service /usr/lib/systemd/system/
+Description=Python LED Control Service
+
+[Service]
+ExecStart=/home/pi/ledControl/venv/bin/python /home/pi/ledControl/main.py
+
+[Install]
+WantedBy=multi-user.target
