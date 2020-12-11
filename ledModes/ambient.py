@@ -9,11 +9,29 @@ aangColors = hexStrToPixelList("#9ECCE0,#F27B44,#904619,#FFDF87,#C48F48,#9ECCE0,
 earthKingdom = hexStrToPixelList("#2E642C,#458643,#4FA24C,#CEBD73,#EDDFA1,#2E642C,#458643,#4FA24C")
 adriftInDream = hexStrToPixelList("#CFF09E,#A8DBA8,#79BD9A,#3B8686,#0B486B")
 multiBreathing = [  Pixel(12,  120, 210), Pixel(12,  12, 240), Pixel(0, 0, 240),Pixel(30, 12, 230), Pixel(50, 240, 60)]
+defaultColors = hexStrToPixelList("#0026E6, #0000B3, #2200CC, #004D99, #0073E6, #00AAFF, #00D5FF, #00FFD5, #00CC44, #006611, #009919, #00FF2A, #33BBFF")
 
 
+class particleParams:
+    def __init__(self, spreadMin = 1, spreadMax = 7, ttlMin = 200, ttlMax=800, gammaMin = 0.1, gammaMax = 0.15):
+        self.spreadMin = spreadMin
+        self.spreadMax = spreadMax
+        self.ttlMin = ttlMin
+        self.ttlMax= ttlMax
+        self.gammaMin = gammaMin
+        self.gammaMax = gammaMax
+
+    def spread(self):
+        return randInt(self.spreadMin, self.spreadMax)
+
+    def timeToLive(self):
+        return randInt(self.ttlMin, self.ttlMax)
+
+    def gamma(self):
+        return randFloat(self.gammaMin, self.gammaMax)
 class particle:
-    def __init__(self, center, spread, drift, timeToLive, color, gamma = 0.1):
-        
+
+    def __init__(self, center, spread, drift, timeToLive, color, gamma = 0.1):   
         self.color = color
         self.center = center
         self.spread = spread
@@ -54,18 +72,19 @@ class particle:
         return self.currentAge >= self.timeToLive
 
     @staticmethod
-    def randomParticle(colors, nLeds, spreadMin = 1, spreadMax = 7, ttlMin = 200, ttlMax=800, gammaMin = 0.1, gammaMax = 0.15):
+    def randomParticle(colors, nLeds, params: particleParams):
         """
         factory to create a random Particle
         """
 
         center = randInt(0, nLeds)
-        spread = randInt(spreadMin, spreadMax)
+        spread = params.spread()
 
         
-        drift = (randFloat(0, 1)-0.5)/100
-        timeToLive = randInt(ttlMin, ttlMax)
-        gamma = randFloat(gammaMin, gammaMax)
+        #drift = (randFloat(0, 1)-0.5)/100
+        drift = 0
+        timeToLive = params.timeToLive()
+        gamma = params.gamma()
 
         colorIndex = randInt(0, len(colors))
         color = colors[colorIndex]
@@ -75,80 +94,82 @@ class particle:
     def __repr__(self):
         return f"<particle object: color: {self.color}, age: {self.currentAge}/{self.timeToLive}, center: {self.center}, spread: {self.spread}>"
 
-    
 
-def display(pixels, nLeds, delay):
-    
-    maxParticles = 15
-    colors = multiBreathing + gryffindorColors
-    particles = [particle.randomParticle(colors, nLeds), particle.randomParticle(colors, nLeds), particle.randomParticle(colors, nLeds)]
-    timeToNextParticleMax = 80
+class ambiLight:
+    def __init__(self, pixels, nLeds, colors=defaultColors, maxParticles = 18, initialParticles=4):
+        self.pixels = pixels
+        self.nLeds = nLeds
+        self.colors = colors
+        self.maxParticles = maxParticles
+        self.timeToNextParticleMax = 80
+        self.timeToNextParticle = randInt(0, self.timeToNextParticleMax)
+        self.pParams = particleParams()
+        self.particles = [particle.randomParticle(self.colors, self.nLeds, self.pParams) for i in range(initialParticles)]
 
-    timeToNextParticle = randInt(0, timeToNextParticleMax)
-    
-    while True:
+    def changeColorPalette(self, palette):
+        self.colors = palette
 
-        newPixels = [Pixel() for n in range(nLeds)]
+    def changeParams(self, spreadMin =None, spreadMax =None, ttlMin =None, ttlMax=None, gammaMin =None, gammaMax =None):
+        if spreadMin:
+            self.pParams.spreadMin = spreadMin
+        if spreadMax:
+            self.pParams.spreadMax = spreadMax   
+        if ttlMin:
+            self.pParams.ttlMin = ttlMin  
+        if ttlMax:
+            self.pParams.ttlMax = ttlMax 
+        if gammaMin:
+            self.pParams.gammaMin = gammaMin  
+        if gammaMax:
+            self.pParams.gammaMax = gammaMax 
 
-        if timeToNextParticle == 0:
-            if len(particles) < maxParticles:
-                newParticle = particle.randomParticle(colors, nLeds)
+    def display(self, delay):
+        while True:
+            self.displaySingleFrame()
+            sleep(delay)
+
+    def displaySingleFrame(self):
+        newPixels = [Pixel() for n in range(self.nLeds)]
+
+        if self.timeToNextParticle == 0:
+            if len(self.particles) < self.maxParticles:
+                newParticle = particle.randomParticle(self.colors, self.nLeds, self.pParams)
                 
-                particles.append(newParticle)
-                timeToNextParticle = randInt(0, timeToNextParticleMax)
+                self.particles.append(newParticle)
+                self.timeToNextParticle = randInt(0, self.timeToNextParticleMax)
         else:
-            timeToNextParticle -= 1
+            self.timeToNextParticle -= 1
 
         deadParticles = []
-        for p in particles:
+        for p in self.particles:
             p.display(newPixels)
             p.age()
             if p.isDed():
                 deadParticles.append(p)
 
-        pixels[:] = [p.toTuple() for p in newPixels]
-        pixels.show()
+        self.pixels[:] = [p.toTuple() for p in newPixels]
+        self.pixels.show()
 
         for p in deadParticles:
-            particles.remove(p)
+            self.particles.remove(p)
 
-        sleep(delay)
 
-def testParticle(pixels, nLeds: int):
-    colors = adriftInDream
-    particleQueue = [particle.randomParticle(colors, nLeds) for i in range(5)]
-    particles = [particle.randomParticle(colors, nLeds)]
-    timeToNextParticle = 20
+    def testParticle(self):
+        particleQueue = [particle.randomParticle(self.colors, self.nLeds) for i in range(5)]
+        particles = [particle.randomParticle(self.colors, self.nLeds)]
+        timeToNextParticle = 20
 
-    while len(particles) > 0 or len(particleQueue > 0):
-        newPixels = [Pixel() for n in range(nLeds)]
-        if timeToNextParticle < 0 and len(particleQueue) > 0:
-            particles.append(particleQueue.pop())
-            timeToNextParticle = 20
-        else:
-            timeToNextParticle -= 1
-
-        for p in particles:
-            p.display(newPixels)
-            p.age()
-            if p.isDed():
-                particles.remove(p)
-
-        pixels[:] = [p.toTuple() for p in newPixels]
-        pixels.show()
-        sleep(0.1)
-
-    #for gamma in [0.1, 0.2, 0.3, 0.4]:
-    #    delay = 0.01
-    #
-    #    p = particle(nLeds//2, 5, 0, 400, Pixel(220,1,5), gamma)
-    #    print(p)
-    #    while not p.isDed():
-    #        newPixels = [Pixel() for n in range(nLeds)]
-    #        p.display(newPixels)
-    #        p.age()
-    #        pixels[:] = [p.toTuple() for p in newPixels]
-    #        pixels.show()
-    #        sleep(delay)
-    #    del p
+        for gamma in [0.1, 0.2, 0.3, 0.4]:
+            delay = 0.01
+        
+            p = particle(self.nLeds//2, 5, 0, 400, Pixel(220,1,5), gamma)
+            print(p)
+            while not p.isDed():
+                newPixels = [Pixel() for n in range(self.nLeds)]
+                p.display(newPixels)
+                p.age()
+                self.pixels[:] = [p.toTuple() for p in newPixels]
+                self.pixels.show()
+                sleep(delay)
+            del p
             

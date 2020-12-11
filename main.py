@@ -14,7 +14,8 @@ pixels = neopixel.NeoPixel(board.D18, nLeds , auto_write = False)
 
 if __name__ == "__main__":
     #ambient.testParticle(pixels, nLeds)
-    ambient.display(pixels, nLeds, 0.01)
+    ambiLight = ambient.ambiLight(pixels, nLeds)
+    ambiLight.display(0.01)
     #multiBreathing.display(pixels, nLeds)
     #rainbow.display(pixels, nLeds, 0.01, style="mono")
     #fire.display(pixels, nLeds)

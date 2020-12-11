@@ -10,7 +10,7 @@ def strToPixel(hexStr: str):
     return Pixel(r, g, b)
 
 def hexStrToPixelList(hexStr: str):
-    listOfHexStr = hexStr.split(",")
+    listOfHexStr = [s.strip(' ') for s in hexStr.split(",")]
     pixels = []
     for hexColor in listOfHexStr:
         if not hexColor.startswith("#"):
@@ -20,4 +20,3 @@ def hexStrToPixelList(hexStr: str):
         pixels.append(strToPixel(hexColor))
 
     return pixels
-        
