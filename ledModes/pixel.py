@@ -29,7 +29,7 @@ class Pixel:
 
 
     def __str__(self):
-        return f'({self.r}, {self.g}, {self.b})'
+        return f'#{hex(self.r)}{hex(self.g)}{hex(self.b)}'
     
     def __repr__(self):
         return self.__str__()

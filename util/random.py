@@ -20,7 +20,8 @@ def randFloat(start, stop):
         stop (float): must be between 0 and 1
     """
     assert(0 <= start <= stop <= 1)
-
+    if start == stop:
+        return start
     precision = 10000
     start = int(start * precision)
     stop = int(stop * precision)

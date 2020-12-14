@@ -9,6 +9,9 @@ def strToPixel(hexStr: str):
     b = int(hexStr[4:6], base=16)
     return Pixel(r, g, b)
 
+def pixelToStr(p: Pixel):
+    return f"#{p.r:02x}{p.g:02x}{p.b:02x}"
+
 def hexStrToPixelList(hexStr: str):
     listOfHexStr = [s.strip(' ') for s in hexStr.split(",")]
     pixels = []
@@ -20,3 +23,6 @@ def hexStrToPixelList(hexStr: str):
         pixels.append(strToPixel(hexColor))
 
     return pixels
+
+def pixelListToStrList(pixelList):
+    return [pixelToStr(p) for p in pixelList]
