@@ -2,13 +2,14 @@ import board
 import neopixel
 import time
 import threading
-from ledModes import ambient, fire, sparkle, rainbow, breathing, multiBreathing
+#from ledModes import ambient, fire, sparkle, rainbow, breathing, multiBreathing
+from extensions import ambient, singleColor
 from typing import Optional
 from fastapi import FastAPI
 import uvicorn
 from threading import Thread, Event
 from api import setupAPI
-
+from modes import setupModes, activeMode, activeModeDisplay
 app = FastAPI()
 
 
@@ -19,14 +20,23 @@ top_left = 23
 pixels = neopixel.NeoPixel(board.D18, nLeds , auto_write = False)
 
 
+
+
+def mainLoop(stopEvent: Event):
+    while not stopEvent.isSet():
+        activeModeDisplay(0.01)
+        
+            
+
 if __name__ == "__main__":
     #ambient.testParticle(pixels, nLeds)
-    ambiLight = ambient.ambiLight(pixels, nLeds)
-    newThread = Thread(target=ambiLight.display, args = (0.01,), daemon=True)
+    setupAPI(app)
+    stopEvent = Event()
+    setupModes(pixels, nLeds, app)
+    newThread = Thread(target=mainLoop, args = (stopEvent,))
     newThread.start()
-    setupAPI(app, ambiLight)
     uvicorn.run(app, host="0.0.0.0", port=8000, debug=True)
-    
+    stopEvent.set()
     #multiBreathing.display(pixels, nLeds)
     #rainbow.display(pixels, nLeds, 0.01, style="mono")
     #fire.display(pixels, nLeds)
