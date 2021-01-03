@@ -29,8 +29,13 @@ class Pixel:
 
 
     def __str__(self):
-        return f'#{hex(self.r)}{hex(self.g)}{hex(self.b)}'
-    
+        string = "#"
+        for c in [self.r, self.g, self.b]:
+            string += hex(c)[2:].zfill(2)
+        if len(string) != 7:
+            raise Exception("color string parsed wrong")
+        return string
+
     def __repr__(self):
         return self.__str__()
 

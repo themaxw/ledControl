@@ -1,4 +1,4 @@
-from extensions import ambient, singleColor
+from extensions import ambient, singleColor, pictureRows
 from threading import Event
 
 __activeMode = None # Type: Extension
@@ -7,7 +7,12 @@ modes = {}
 
 
 def setupModes(pixels, nLeds, app):
-    for m in [ambient.ambiLight(pixels, nLeds), singleColor.SingleColor(pixels, nLeds)]:
+    modelist = [
+        ambient.ambiLight(pixels, nLeds), 
+        singleColor.SingleColor(pixels, nLeds),
+        pictureRows.pictureRows(pixels, nLeds)
+    ]
+    for m in modelist:
         modes[m.name] = m
         m.registerEndpoints(app)
 

@@ -24,10 +24,12 @@ class Extension(ABC):
     def display(self):
         pass
 
-    @abstractmethod
     def update(self, params):
-        #TODO Put this here, so the user only has to overwrite it in special scenarios
-        pass
+        for p in self.parameters:
+            newVal = getattr(params, p)
+            if newVal:
+                self.parameters[p].update(newVal)
+
 
     @abstractmethod
     def createModel(self):

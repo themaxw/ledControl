@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 from pydantic import BaseModel
 from typing import Union
+from fastapi import HTTPException
 
 Numeric = Union[float, int]
 
@@ -48,7 +49,7 @@ class UIElement(ABC):
         return uiDict
 
     @abstractmethod 
-    def update(self, *args):
+    def update(self, updateDict):
         pass
 
     @property
@@ -81,11 +82,19 @@ class UIRange(UIElement):
 
         return fields
 
-    def update(self, lower=None, upper=None):
+    def update(self, newVal = {}):
+
+        lower = getattr(newVal, "lower", None)
+        upper = getattr(newVal, "upper", None)
+
+        if upper and lower and not lower <= upper <= self.max:
+            raise HTTPException(400, "invalid lower and upper boundaries" )
         if lower:
-            self.lower = lower if lower < self.upper else self.upper
+            self.lower = lower if lower < self.max else self.max
+
         if upper:
             self.upper = upper if upper < self.max else self.max
+            
 
     @property
     def value(self):
@@ -112,7 +121,8 @@ class UIValue(UIElement):
             fields["stepSize"] = self.stepSize
         return fields
     
-    def update(self, current=None):
+    def update(self, newVal={}):
+        current = getattr(newVal, "current", None)
         if current:
             self.current = current if current < self.max else self.max
 
