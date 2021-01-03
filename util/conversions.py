@@ -1,4 +1,4 @@
-from ledModes.pixel import Pixel
+from core.pixel import Pixel
 
 
 def strToPixel(hexStr: str):

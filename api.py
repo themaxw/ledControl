@@ -2,10 +2,9 @@ from typing import Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from extensions.ambient import ambiLight
-from util.conversions import hexStrToPixelList, pixelListToStrList, strToPixel
+
 from typing import List
-from modes import getModes, activeMode, changeMode
+from core.modes import getModes, activeMode, changeMode
 origins = ["http://localhost", "http://localhost:3000", "http://192.168.178.21:3000", "http://192.168.178.21", "http://det.lef"]
 
 def setupAPI(app: FastAPI):

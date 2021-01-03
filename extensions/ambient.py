@@ -1,14 +1,14 @@
-from ledModes.pixel import Pixel
+from core.pixel import Pixel
 from util.random import randInt, randFloat
 import math
 from util.conversions import hexStrToPixelList, pixelListToStrList, strToPixel
 from time import sleep
 from pydantic import BaseModel
 from typing import Optional, List
-from ui import UIRange, UIValue, rangeModelFloat, rangeModelInt, valueModelInt
+from core.ui import UIRange, UIValue, rangeModelFloat, rangeModelInt, valueModelInt
 
-from extension import Extension
-from color import palette
+from core.extension import Extension
+from core.color import palette
 
 
 class particle:
@@ -78,35 +78,21 @@ class particle:
 
 
 class ambiLight(Extension):
-    def __init__(self, pixels, nLeds, maxParticles = 18, initialParticles=4):
-        super().__init__("Ambilight", pixels, nLeds)
-        
-        self.parameters["maxParticles"] = UIValue("Max amount of Particles", "maxParticles", current=maxParticles, maxValue=30)
-        self.parameters["maxTimeToNextParticle"] = UIValue("Max Wait time for next particle spawn", "maxTimeToNextParticle", current=80, maxValue=1000)
+
+    name = "ambilight"
+
+    def setupParameters(self, maxParticles=18, initialParticles=4):
+        return [
+            UIValue("Max amount of Particles", "maxParticles", current=maxParticles, maxValue=30),
+            UIValue("Max Wait time for next particle spawn", "maxTimeToNextParticle", current=80, maxValue=1000),
+            UIRange("Spread", "spread", 1, 7, 31),
+            UIRange("Time to Live", "ttl", 200, 800, 1000),
+            UIRange("Gamma", "gamma", 0.1, 0.15, maxValue=0.6, stepSize=0.01)
+        ]
+
+    def initialize(self, maxParticles=18, initialParticles=4):
         self.timeToNextParticle = randInt(0, self.parameters["maxTimeToNextParticle"].value)
-        
-        self.parameters["spread"] = UIRange("Spread", "spread", 1, 7, 31)
-        self.parameters["ttl"] = UIRange("Time to Live", "ttl", 200, 800, 1000)
-        self.parameters["gamma"] = UIRange("Gamma", "gamma", 0.1, 0.15, maxValue=0.6, stepSize=0.01)
-        
         self.particles = [particle.randomParticle(palette.current, self.nLeds, self.parameters) for i in range(initialParticles)]
-        self.createModel()
-
-
-    # def update(self, params):
-        
-    #     #TODO add to extension.py using getattr()        
-    #     if params.spread:
-    #         self.parameters["spread"].update(params.spread.lower, params.spread.upper)
-    #     if params.ttl:
-    #         self.parameters["ttl"].update(params.ttl.lower, params.ttl.upper)
-    #     if params.gamma:
-    #         self.parameters["gamma"].update(params.gamma.lower, params.gamma.upper)
-    #     if params.maxParticles:
-    #         self.parameters["maxParticles"].update(params.maxParticles.current)
-    #     if params.maxTimeToNextParticle:
-    #         self.parameters["maxTimeToNextParticle"].update(params.maxTimeToNextParticle.current)
-        
 
     def display(self, delay):
         
@@ -137,7 +123,6 @@ class ambiLight(Extension):
 
         for p in deadParticles:
             self.particles.remove(p)
-
 
     def createModel(self):
         

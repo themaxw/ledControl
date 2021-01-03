@@ -9,7 +9,8 @@ from fastapi import FastAPI
 import uvicorn
 from threading import Thread, Event
 from api import setupAPI
-from modes import setupModes, activeMode, activeModeDisplay
+from core.modes import setupModes, activeMode, activeModeDisplay
+
 app = FastAPI()
 
 

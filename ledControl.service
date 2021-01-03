@@ -3,6 +3,7 @@
 Description=Python LED Control Service
 
 [Service]
+WorkingDirectory=/home/pi/ledControl
 ExecStart=/home/pi/ledControl/venv/bin/python /home/pi/ledControl/main.py
 
 [Install]

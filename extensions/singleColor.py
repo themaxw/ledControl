@@ -1,5 +1,5 @@
-from extension import Extension
-from ui import UIValue, valueModelInt
+from core.extension import Extension
+from core.ui import UIValue, valueModelInt
 from neopixel import NeoPixel
 from pydantic import BaseModel
 from typing import Optional, List
@@ -28,11 +28,12 @@ def wheel(pos):
     return (r, b, g)
 
 class SingleColor(Extension):
-    def __init__(self, pixels: NeoPixel, nLeds, initial = 20):
-        super().__init__("SingleColor", pixels, nLeds)
-        self.parameters["color"] = UIValue("Color", "color", initial, 255)
-        self.createModel()
-        
+    name = "singlecolor"
+
+    def setupParameters(self, initial = 20):
+        return [
+            UIValue("Color", "color", initial, 255)
+        ]
 
     def update(self, params):
         if params.color:

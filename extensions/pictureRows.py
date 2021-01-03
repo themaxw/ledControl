@@ -1,23 +1,28 @@
-from extension import Extension
-from ui import UIValue, valueModelInt
+from core.extension import Extension
+from core.ui import UIValue, valueModelInt, UIUrl, urlModel
 from time import sleep
 from PIL import Image
 from pydantic import BaseModel
-from ledModes.pixel import Pixel
+from core.pixel import Pixel
 from typing import Optional
+import requests
+from io import BytesIO
 
 class pictureRows(Extension):
-    def __init__(self, pixels, nLeds):
-        super().__init__("pictureRows", pixels, nLeds)
+    
+    name = "picturerows"
 
-        self.parameters["time"] = UIValue("Time per Row", "time", 3, 1000)
-        self.parameters["smooth"] = UIValue("Smoothing of Steps", "smooth", 0, 100)
-        image = Image.open("resources/default.jpg")
-        self.image = image.resize((image.size[0], nLeds))
+    def setupParameters(self):
+        return [
+            UIValue("Time per Row", "time", 3, 1000),
+            UIValue("Smoothing of Steps", "smooth", 0, 100),
+            UIUrl("URL of image", "url", "")
+        ]
+
+    def initialize(self):
         self.timeToNextCol = 0
         self.currentRow = -1
-        self.createModel()
-
+        self.loadImageLocal("resources/vibrant.jpg")
 
     def imageRowToPixels(self, row: int):
         newPixels = []
@@ -27,21 +32,39 @@ class pictureRows(Extension):
         return newPixels
 
     def display(self, delay):
+
+        if self.parameters["url"].changed:
+            self.loadImageFromUrl()
+            self.timeToNextCol = 0
+            self.currentRow = -1
+
         if self.timeToNextCol == 0:
+
             self.currentRow = (self.currentRow + 1)% self.image.size[0]
             newPixels = self.imageRowToPixels(self.currentRow)
-            print(len(newPixels), self.currentRow)
+            
             self.pixels[:] = [p.toTuple() for p in newPixels]
             self.pixels.show()
             self.timeToNextCol = self.parameters["time"].value
         else:
             self.timeToNextCol -= 1
         sleep(delay)
+    
+    def loadImageFromUrl(self):
+        #TODO error handling hier
+        response = requests.get(self.parameters["url"].value)
+        image = Image.open(BytesIO(response.content))
+        self.image = image.resize((image.size[0], self.nLeds))
+    
+    def loadImageLocal(self, path):
+        image = Image.open(path)
+        self.image = image.resize((image.size[0], self.nLeds))
 
     def createModel(self):
         class pictureRowModel(BaseModel):
             time: Optional[valueModelInt] = None
             smooth: Optional[valueModelInt] = None
+            url: Optional[urlModel] = None
 
         self.model = pictureRowModel
 
