@@ -50,6 +50,7 @@ class Extension(ABC):
 
     @abstractmethod
     def createModel(self):
+        #TODO somehow do that automatically from the parameter list
         pass
     
     def customEndpoints(self, app):
