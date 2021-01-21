@@ -35,12 +35,8 @@ class SingleColor(Extension):
             UIValue("Color", "color", initial, 255)
         ]
 
-    def update(self, params):
-        if params.color:
-            self.parameters["color"].update(params.color.current)
-
     def display(self, delay):
-        
+        #TODO create a fade to the next value
         self.pixels.fill(wheel(self.parameters["color"].value))
         self.pixels.show()
         sleep(delay)
