@@ -1,6 +1,5 @@
 from core.extension import Extension
 from core.ui import UIValue, valueModelInt
-from neopixel import NeoPixel
 from pydantic import BaseModel
 from typing import Optional, List
 from time import sleep
@@ -27,16 +26,15 @@ def wheel(pos):
         b = int(255 - pos * 3)
     return (r, b, g)
 
+
 class SingleColor(Extension):
     name = "singlecolor"
 
-    def setupParameters(self, initial = 20):
-        return [
-            UIValue("Color", "color", initial, 255)
-        ]
+    def setupParameters(self, initial=20):
+        return [UIValue("Color", "color", initial, 255)]
 
     def display(self, delay):
-        #TODO create a fade to the next value
+        # TODO create a fade to the next value
         self.pixels.fill(wheel(self.parameters["color"].value))
         self.pixels.show()
         sleep(delay)
@@ -44,6 +42,7 @@ class SingleColor(Extension):
     def createModel(self):
         class scModel(BaseModel):
             color: Optional[valueModelInt]
+
         self.model = scModel
 
     def customEndpoints(self, app):
