@@ -23,22 +23,21 @@ class Neopixel:
     def newArray(self, rgbarray):
         with self.lock:
             for i, (r, g, b) in enumerate(rgbarray):
-                if i == 0:
-                    print(r, g, b)
                 if i >= self.nLeds:
                     break
-                self.pixels.setPixelColor(i, (g, r, b))
+                self.pixels.setPixelColor(i, (r, b, g))
 
     def __setitem__(self, key, value):
         self.newArray(value)
 
     def fill(self, rgb):
+        r, g, b = rgb
         with self.lock:
-            self.pixels.fill(rgb, 0, self.nLeds)
+            self.pixels.fill((r, b, g), 0, self.nLeds)
 
     def emulatorLoop(self):
 
-        self.pixels.begin()
+        self.pixels.begin(window_w=1100, window_h=12)
         self.pixels.setBrightness(100)
         self.setupFinished.set()
         while not self.stopEvent.is_set():

@@ -1,4 +1,4 @@
-from extensions import ambient, singleColor, pictureRows
+from extensions import ambient, singleColor, pictureRows, spotify
 from threading import Event
 
 __activeMode = None  # Type: Extension
@@ -10,6 +10,7 @@ def setupModes(pixels, nLeds, app):
         ambient.ambiLight(pixels, nLeds),
         singleColor.SingleColor(pixels, nLeds),
         pictureRows.pictureRows(pixels, nLeds),
+        spotify.spotify(pixels, nLeds),
     ]
     for m in modelist:
         modes[m.name] = m

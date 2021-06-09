@@ -17,7 +17,7 @@ app = FastAPI()
 nLeds = 31
 top_right = 9
 top_left = 23
-PC_DEBUG = True
+PC_DEBUG = False
 stopEvent = Event()
 
 if not PC_DEBUG:
@@ -27,10 +27,10 @@ if not PC_DEBUG:
     pixels = neopixel.NeoPixel(board.D18, nLeds, auto_write=False)
 else:
     from neopixel_emulator.dummyLeds import Neopixel
+    from core.pixel import Pixel
+    from time import sleep
 
     pixels = Neopixel(nLeds, stopEvent)
-    pixels[:] = [(0, 0, 0) for i in np.linspace(0, 255, 31)]
-    pixels.show()
 
 
 def mainLoop(stopEvent: Event):

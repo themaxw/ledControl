@@ -140,3 +140,4 @@ cython_debug/
 
 .Trash*
 .vscode/sftp.json
+conf.toml
