@@ -31,7 +31,7 @@ class particle:
         self.currentAge += 1
         self.center += self.drift
         # TODO make drift smoother. Maybe toss a coin with the chance in drift, and if it lands move in either direction
-        prevPixel = self.pixel
+        # prevPixel = self.pixel
         self.pixel = self.color * self.calculateBreath()
 
     def display(self, pixelArray):
